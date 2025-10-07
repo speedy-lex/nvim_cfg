@@ -2,10 +2,11 @@ vim.cmd("set expandtab")
 vim.cmd("set tabstop=4")
 vim.cmd("set softtabstop=4")
 vim.cmd("set shiftwidth=4")
+
 vim.lsp.inlay_hint.enable()
 vim.diagnostic.config({
     virtual_text = {
-        prefix = "!",  -- can be "■", "●", "▎", "x"
+        prefix = "!",
         spacing = 2,
     },
     textDocument = {
@@ -18,8 +19,10 @@ vim.diagnostic.config({
     underline = true,
     signs = true,
 })
+
 vim.opt.clipboard = "unnamedplus"
 vim.opt.number = true
+
 vim.opt.relativenumber = true
 
 vim.g.mapleader = "."
@@ -41,9 +44,34 @@ local plugins = {
     {
         "olimorris/onedarkpro.nvim",
         priority = 1000,
+        config = function()
+            require("onedarkpro").setup({
+                colors = {
+                    bg = "#111111",
+                }
+            })
+
+            vim.cmd("colorscheme onedark_dark")
+        end
     },
     {
-        "nvim-telescope/telescope.nvim"
+        "nvim-telescope/telescope.nvim",
+        config = function()
+            local actions = require("telescope.actions")
+            require("telescope").setup({
+                defaults = {
+                    mappings = {
+                        i = {
+                            ["<esc>"] = actions.close
+                        },
+                    },
+                },
+            })
+
+            local builtin = require('telescope.builtin')
+            vim.keymap.set('n', '<leader>fd', builtin.find_files, { desc = 'Telescope find files' })
+            vim.keymap.set('n', '<leader>ff', builtin.git_files, { desc = 'Telescope git files' })
+        end
     },
     {
         "NeogitOrg/neogit",
@@ -54,6 +82,18 @@ local plugins = {
             "nvim-telescope/telescope.nvim",
         },
         lazy = false, -- or else it takes forever bro
+        config = function()
+            require('neogit').setup {
+                kind = "split"
+            }
+            vim.keymap.set(
+                "n",
+                "<leader>gi",
+                function()
+                    vim.cmd("Neogit")
+                end
+            )
+        end
     },
     {
         "lewis6991/gitsigns.nvim",
@@ -61,6 +101,33 @@ local plugins = {
     {
         'mrcjkb/rustaceanvim',
         lazy = false,
+        config = function()
+            vim.g.rustaceanvim = {
+                server = {
+                    settings = {
+                        ["rust-analyzer"] = {
+                            check = {
+                                command = "clippy",
+                                features = "all",
+                                extraArgs = { "--target-dir", "./target/rust-analyzer" },
+                            },
+                            diagnostics = {
+                                enable = true,
+                            },
+                        },
+                    },
+                },
+            }
+            vim.keymap.set(
+                "n", 
+                "<leader>.", 
+                function()
+                    vim.cmd.RustLsp('codeAction') -- supports rust-analyzer's grouping
+                    -- or vim.lsp.buf.codeAction() if you don't want grouping.
+                end,
+                { silent = true, buffer = bufnr }
+            )
+        end
     },
     {
         "nvim-treesitter/nvim-treesitter",
@@ -144,67 +211,8 @@ local plugins = {
         end,
     },
 }
+
 local opts = {}
 
 require("lazy").setup(plugins, opts)
-
-require("onedarkpro").setup({
-    colors = {
-        bg = "#111111",
-    }
-})
-
-vim.cmd("colorscheme onedark_dark")
-
-local actions = require("telescope.actions")
-require("telescope").setup({
-    defaults = {
-        mappings = {
-            i = {
-                ["<esc>"] = actions.close
-            },
-        },
-    },
-})
-
-local builtin = require('telescope.builtin')
-vim.keymap.set('n', '<leader>fd', builtin.find_files, { desc = 'Telescope find files' })
-vim.keymap.set('n', '<leader>ff', builtin.git_files, { desc = 'Telescope git files' })
-
-require('neogit').setup {
-    kind = "split"
-}
-
-vim.keymap.set(
-    "n", 
-    "<leader>.", 
-    function()
-        vim.cmd.RustLsp('codeAction') -- supports rust-analyzer's grouping
-        -- or vim.lsp.buf.codeAction() if you don't want grouping.
-    end,
-    { silent = true, buffer = bufnr }
-)
-vim.keymap.set(
-    "n",
-    "<leader>gi",
-    function()
-        vim.cmd("Neogit")
-    end
-)
-vim.g.rustaceanvim = {
-    server = {
-        settings = {
-            ["rust-analyzer"] = {
-                check = {
-                    command = "clippy",
-                    features = "all",
-                    extraArgs = { "--target-dir", "./target/rust-analyzer" },
-                },
-                diagnostics = {
-                    enable = true,
-                },
-            },
-        },
-    },
-}
 
