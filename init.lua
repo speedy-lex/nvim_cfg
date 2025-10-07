@@ -19,6 +19,8 @@ vim.diagnostic.config({
     signs = true,
 })
 vim.opt.clipboard = "unnamedplus"
+vim.opt.number = true
+vim.opt.relativenumber = true
 
 vim.g.mapleader = "."
 
@@ -51,6 +53,7 @@ local plugins = {
 
             "nvim-telescope/telescope.nvim",
         },
+        lazy = false, -- or else it takes forever bro
     },
     {
         "lewis6991/gitsigns.nvim",
@@ -72,15 +75,74 @@ local plugins = {
             }
         end
     },
-    --[{
-    --    "hrsh7th/nvim-cmp",
-    --    dependencies = {
-    --       "hrsh7th/cmp-nvim-lsp",
-    --        "L3MON4D3/LuaSnip",
-    --        "saadparwaiz1/cmp_luasnip",
-    --    },
-    --    lazy = false,
-    --},
+    {
+        'neovim/nvim-lspconfig',
+        config = function()
+            local capabilities = require('cmp_nvim_lsp').default_capabilities()
+            -- require('lspconfig')['language-server'].setup {
+            --     capabilities = capabilities,
+            -- }
+        end,
+        dependencies = { 'hrsh7th/nvim-cmp' },
+    },
+    {
+        'L3MON4D3/LuaSnip',
+        dependencies = { 'saadparwaiz1/cmp_luasnip', 'rafamadriz/friendly-snippets' },
+        config = function()
+            require("luasnip.loaders.from_vscode").lazy_load()
+        end,
+    },
+    {
+        'hrsh7th/nvim-cmp',
+        dependencies = {
+            'hrsh7th/cmp-nvim-lsp',
+            'hrsh7th/cmp-buffer',
+            'hrsh7th/cmp-path',
+            'hrsh7th/cmp-cmdline',
+            'L3MON4D3/LuaSnip',
+        },
+        config = function()
+            local cmp = require('cmp')
+
+            cmp.setup({
+            snippet = {
+                expand = function(args)
+                    require('luasnip').lsp_expand(args.body)
+                end,
+            },
+            mapping = cmp.mapping.preset.insert({
+                ['<C-k>'] = cmp.mapping.scroll_docs(-4),
+                ['<C-j>'] = cmp.mapping.scroll_docs(4),
+                ['<C-e>'] = cmp.mapping.abort(),
+                ['<CR>'] = cmp.mapping.confirm({ select = true }),
+            }),
+            sources = cmp.config.sources({
+                { name = 'nvim_lsp' },
+                { name = 'luasnip' },
+                { name = 'buffer' },
+                { name = 'path' },
+            }),
+        })
+
+        -- Command-line completions
+        cmp.setup.cmdline({ '/', '?' }, {
+            mapping = cmp.mapping.preset.cmdline(),
+            sources = {
+                { name = 'buffer' }
+            }
+        })
+
+        cmp.setup.cmdline(':', {
+            mapping = cmp.mapping.preset.cmdline(),
+            sources = cmp.config.sources({
+                { name = 'path' }
+            }, {
+                { name = 'cmdline' }
+            }),
+            matching = { disallow_symbol_nonprefix_matching = false }
+        })
+        end,
+    },
 }
 local opts = {}
 
@@ -114,13 +176,20 @@ require('neogit').setup {
 }
 
 vim.keymap.set(
-  "n", 
-  "<leader>.", 
-  function()
-    vim.cmd.RustLsp('codeAction') -- supports rust-analyzer's grouping
-    -- or vim.lsp.buf.codeAction() if you don't want grouping.
-  end,
-  { silent = true, buffer = bufnr }
+    "n", 
+    "<leader>.", 
+    function()
+        vim.cmd.RustLsp('codeAction') -- supports rust-analyzer's grouping
+        -- or vim.lsp.buf.codeAction() if you don't want grouping.
+    end,
+    { silent = true, buffer = bufnr }
+)
+vim.keymap.set(
+    "n",
+    "<leader>gi",
+    function()
+        vim.cmd("Neogit")
+    end
 )
 vim.g.rustaceanvim = {
     server = {
