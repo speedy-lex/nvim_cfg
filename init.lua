@@ -2,6 +2,18 @@ vim.cmd("set expandtab")
 vim.cmd("set tabstop=4")
 vim.cmd("set softtabstop=4")
 vim.cmd("set shiftwidth=4")
+vim.lsp.inlay_hint.enable()
+vim.diagnostic.config({
+  virtual_text = {
+    prefix = "!",  -- can be "■", "●", "▎", "x"
+    spacing = 2,
+  },
+  severity_sort = true,
+  update_in_insert = false,
+  underline = true,
+  signs = true,
+})
+vim.opt.clipboard = "unnamedplus"
 
 vim.g.mapleader = "."
 
@@ -38,6 +50,19 @@ local plugins = {
     {
         "lewis6991/gitsigns.nvim",
     },
+    {
+        'mrcjkb/rustaceanvim',
+        lazy = false,
+    },
+    {
+        "hrsh7th/nvim-cmp",
+        dependencies = {
+            "hrsh7th/cmp-nvim-lsp",
+            "L3MON4D3/LuaSnip",
+            "saadparwaiz1/cmp_luasnip",
+        },
+        lazy = false,
+    },
 }
 local opts = {}
 
@@ -67,9 +92,32 @@ vim.keymap.set('n', '<leader>fd', builtin.find_files, { desc = 'Telescope find f
 vim.keymap.set('n', '<leader>ff', builtin.git_files, { desc = 'Telescope git files' })
 
 require('neogit').setup {
-    integrations = {
-        diffview = true
-    },
     kind = "split"
+}
+
+vim.keymap.set(
+  "n", 
+  "<leader>.", 
+  function()
+    vim.cmd.RustLsp('codeAction') -- supports rust-analyzer's grouping
+    -- or vim.lsp.buf.codeAction() if you don't want grouping.
+  end,
+  { silent = true, buffer = bufnr }
+)
+vim.g.rustaceanvim = {
+    server = {
+        settings = {
+            ["rust-analyzer"] = {
+                check = {
+                    command = "clippy",
+                    features = "all",
+                    extraArgs = { "--target-dir", "./target/rust-analyzer" },
+                },
+                diagnostics = {
+                    enable = true,
+                },
+            },
+        },
+    },
 }
 
