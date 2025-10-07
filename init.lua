@@ -4,14 +4,19 @@ vim.cmd("set softtabstop=4")
 vim.cmd("set shiftwidth=4")
 vim.lsp.inlay_hint.enable()
 vim.diagnostic.config({
-  virtual_text = {
-    prefix = "!",  -- can be "■", "●", "▎", "x"
-    spacing = 2,
-  },
-  severity_sort = true,
-  update_in_insert = false,
-  underline = true,
-  signs = true,
+    virtual_text = {
+        prefix = "!",  -- can be "■", "●", "▎", "x"
+        spacing = 2,
+    },
+    textDocument = {
+        semanticTokens = {
+            multilineTokenSupport = true,
+        },
+    },
+    severity_sort = true,
+    update_in_insert = false,
+    underline = true,
+    signs = true,
 })
 vim.opt.clipboard = "unnamedplus"
 
@@ -55,14 +60,27 @@ local plugins = {
         lazy = false,
     },
     {
-        "hrsh7th/nvim-cmp",
-        dependencies = {
-            "hrsh7th/cmp-nvim-lsp",
-            "L3MON4D3/LuaSnip",
-            "saadparwaiz1/cmp_luasnip",
-        },
-        lazy = false,
+        "nvim-treesitter/nvim-treesitter",
+        build = ":TSUpdate",
+        config = function()
+            require'nvim-treesitter.configs'.setup {
+                ensure_installed = { "rust", "c", "cpp" },
+                highlight = {
+                    enable = true,              -- false will disable the whole extension
+                    additional_vim_regex_highlighting = false,
+                },
+            }
+        end
     },
+    --[{
+    --    "hrsh7th/nvim-cmp",
+    --    dependencies = {
+    --       "hrsh7th/cmp-nvim-lsp",
+    --        "L3MON4D3/LuaSnip",
+    --        "saadparwaiz1/cmp_luasnip",
+    --    },
+    --    lazy = false,
+    --},
 }
 local opts = {}
 
