@@ -133,8 +133,15 @@ local plugins = {
         "nvim-treesitter/nvim-treesitter",
         build = ":TSUpdate",
         config = function()
+            local parser_config = require "nvim-treesitter.parsers".get_parser_configs()
+            parser_config.wgsl = {
+                install_info = {
+                    url = "https://github.com/szebniok/tree-sitter-wgsl",
+                    files = {"src/parser.c", "src/scanner.c"}
+                },
+            }
             require'nvim-treesitter.configs'.setup {
-                ensure_installed = { "rust", "c", "cpp" },
+                ensure_installed = { "rust", "c", "cpp", "wgsl" },
                 highlight = {
                     enable = true,              -- false will disable the whole extension
                     additional_vim_regex_highlighting = false,
@@ -146,9 +153,14 @@ local plugins = {
         'neovim/nvim-lspconfig',
         config = function()
             local capabilities = require('cmp_nvim_lsp').default_capabilities()
-            -- require('lspconfig')['language-server'].setup {
-            --     capabilities = capabilities,
-            -- }
+            -- vim.lsp.enable("wgsl_analyzer")
+            -- vim.lsp.config("wgsl_analyzer", {
+            --   on_attach = function(client, bufnr)
+            --     vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
+            --   end
+            -- })
+            vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, { pattern = "*.wgsl",  command = "setfiletype wgsl" })
+            vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, { pattern = "*.wesl",  command = "setfiletype wesl" })
         end,
         dependencies = { 'hrsh7th/nvim-cmp' },
     },
