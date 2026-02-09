@@ -139,7 +139,7 @@ local plugins = {
                 },
             }
             require'nvim-treesitter.configs'.setup {
-                ensure_installed = { "rust", "c", "cpp", "wgsl" },
+                ensure_installed = { "rust", "c", "cpp", "wgsl", "zig" },
                 highlight = {
                     enable = true,
                     additional_vim_regex_highlighting = false,
@@ -151,6 +151,9 @@ local plugins = {
         'neovim/nvim-lspconfig',
         config = function()
             local capabilities = require('cmp_nvim_lsp').default_capabilities()
+            vim.lsp.enable("zls")
+            vim.lsp.enable("clangd")
+            vim.lsp.enable("lua_ls")
             -- vim.lsp.enable("wgsl_analyzer")
             -- vim.lsp.config("wgsl_analyzer", {
             --   on_attach = function(client, bufnr)
