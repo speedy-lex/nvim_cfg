@@ -2,6 +2,7 @@ vim.cmd("set expandtab")
 vim.cmd("set tabstop=4")
 vim.cmd("set softtabstop=4")
 vim.cmd("set shiftwidth=4")
+vim.cmd("colorscheme unokai")
 
 vim.lsp.inlay_hint.enable()
 vim.diagnostic.config({
@@ -42,17 +43,7 @@ vim.opt.rtp:prepend(lazypath)
 
 local plugins = {
     {
-        "olimorris/onedarkpro.nvim",
-        priority = 1000,
-        config = function()
-            require("onedarkpro").setup({
-                colors = {
-                    bg = "#111111",
-                }
-            })
-
-            vim.cmd("colorscheme onedark_dark")
-        end
+        "nvim-tree/nvim-web-devicons" -- nerdfont support
     },
     {
         "nvim-telescope/telescope.nvim",
@@ -74,6 +65,15 @@ local plugins = {
         end
     },
     {
+        'nvim-lualine/lualine.nvim',
+        dependencies = { 'nvim-tree/nvim-web-devicons' },
+        config = function()
+            require('lualine').setup {
+                options = { theme = 'seoul256' },
+            }
+        end
+    },
+    {
         "NeogitOrg/neogit",
         dependencies = {
             "nvim-lua/plenary.nvim",
@@ -81,7 +81,6 @@ local plugins = {
 
             "nvim-telescope/telescope.nvim",
         },
-        lazy = false, -- or else it takes forever bro
         config = function()
             require('neogit').setup {
                 kind = "split"
@@ -122,8 +121,7 @@ local plugins = {
                 "n", 
                 "<leader>.", 
                 function()
-                    vim.cmd.RustLsp('codeAction') -- supports rust-analyzer's grouping
-                    -- or vim.lsp.buf.codeAction() if you don't want grouping.
+                    vim.cmd.RustLsp('codeAction')
                 end,
                 { silent = true, buffer = bufnr }
             )
@@ -143,7 +141,7 @@ local plugins = {
             require'nvim-treesitter.configs'.setup {
                 ensure_installed = { "rust", "c", "cpp", "wgsl" },
                 highlight = {
-                    enable = true,              -- false will disable the whole extension
+                    enable = true,
                     additional_vim_regex_highlighting = false,
                 },
             }
@@ -159,8 +157,8 @@ local plugins = {
             --     vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
             --   end
             -- })
-            vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, { pattern = "*.wgsl",  command = "setfiletype wgsl" })
-            vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, { pattern = "*.wesl",  command = "setfiletype wesl" })
+            -- vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, { pattern = "*.wgsl",  command = "setfiletype wgsl" })
+            -- vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, { pattern = "*.wesl",  command = "setfiletype wesl" })
         end,
         dependencies = { 'hrsh7th/nvim-cmp' },
     },
