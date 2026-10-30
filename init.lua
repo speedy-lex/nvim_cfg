@@ -129,23 +129,32 @@ local plugins = {
     },
     {
         "nvim-treesitter/nvim-treesitter",
+        branch = "main",
+        lazy = false,
         build = ":TSUpdate",
+        dependencies = {
+            "neovim-treesitter/treesitter-parser-registry",
+        },
         config = function()
-            local parser_config = require "nvim-treesitter.parsers".get_parser_configs()
-            parser_config.wgsl = {
-                install_info = {
-                    url = "https://github.com/szebniok/tree-sitter-wgsl",
-                    files = {"src/parser.c", "src/scanner.c"}
-                },
-            }
-            require'nvim-treesitter.configs'.setup {
-                ensure_installed = { "rust", "c", "cpp", "wgsl", "zig" },
-                highlight = {
-                    enable = true,
-                    additional_vim_regex_highlighting = false,
-                },
-            }
-        end
+            require("nvim-treesitter").setup({
+                install_dir = vim.fn.stdpath("data") .. "/site",
+            })
+
+            require("nvim-treesitter").install({
+                "rust",
+                "c",
+                "cpp",
+                "wgsl",
+                "zig",
+            })
+
+            vim.api.nvim_create_autocmd("FileType", {
+                pattern = { "rust", "c", "cpp", "wgsl", "zig" },
+                callback = function()
+                    vim.treesitter.start()
+                end,
+            })
+        end,
     },
     {
         'neovim/nvim-lspconfig',
@@ -154,14 +163,6 @@ local plugins = {
             vim.lsp.enable("zls")
             vim.lsp.enable("clangd")
             vim.lsp.enable("lua_ls")
-            -- vim.lsp.enable("wgsl_analyzer")
-            -- vim.lsp.config("wgsl_analyzer", {
-            --   on_attach = function(client, bufnr)
-            --     vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
-            --   end
-            -- })
-            -- vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, { pattern = "*.wgsl",  command = "setfiletype wgsl" })
-            -- vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, { pattern = "*.wesl",  command = "setfiletype wesl" })
         end,
         dependencies = { 'hrsh7th/nvim-cmp' },
     },
